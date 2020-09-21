@@ -1,6 +1,8 @@
 {
   "name": "ngx-drawable-canvas",
   "version": "0.0.1",
+  "author": "Matthias Fischer",
+  "license": "MIT",
   "peerDependencies": {
     "@angular/common": "^10.0.14",
     "@angular/core": "^10.0.14"
