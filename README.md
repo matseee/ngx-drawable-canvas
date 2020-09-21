@@ -5,3 +5,16 @@ a angular10 drawable canvas component.
 ```bash
 npm i --save ngx-drawable-canvas
 ```
+
+### development informations
+
+Library:
+```bash
+npm install
+ng build ngx-drawable-canvas --watch
+```
+
+Example-application:
+```bash
+ng serve ngx-drawable-canvas-testpage
+```
