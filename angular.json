@@ -1,0 +1,168 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "ngx-drawable-canvas": {
+      "projectType": "library",
+      "root": "projects/ngx-drawable-canvas",
+      "sourceRoot": "projects/ngx-drawable-canvas/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ngx-drawable-canvas/tsconfig.lib.json",
+            "project": "projects/ngx-drawable-canvas/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngx-drawable-canvas/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ngx-drawable-canvas/src/test.ts",
+            "tsConfig": "projects/ngx-drawable-canvas/tsconfig.spec.json",
+            "karmaConfig": "projects/ngx-drawable-canvas/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ngx-drawable-canvas/tsconfig.lib.json",
+              "projects/ngx-drawable-canvas/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
+    },
+    "ngx-drawable-canvas-testpage": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/ngx-drawable-canvas-testpage",
+      "sourceRoot": "projects/ngx-drawable-canvas-testpage/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/ngx-drawable-canvas-testpage",
+            "index": "projects/ngx-drawable-canvas-testpage/src/index.html",
+            "main": "projects/ngx-drawable-canvas-testpage/src/main.ts",
+            "polyfills": "projects/ngx-drawable-canvas-testpage/src/polyfills.ts",
+            "tsConfig": "projects/ngx-drawable-canvas-testpage/tsconfig.app.json",
+            "aot": true,
+            "assets": [
+              "projects/ngx-drawable-canvas-testpage/src/favicon.ico",
+              "projects/ngx-drawable-canvas-testpage/src/assets"
+            ],
+            "styles": [
+              "projects/ngx-drawable-canvas-testpage/src/styles.scss"
+            ],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/ngx-drawable-canvas-testpage/src/environments/environment.ts",
+                  "with": "projects/ngx-drawable-canvas-testpage/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "ngx-drawable-canvas-testpage:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "ngx-drawable-canvas-testpage:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "ngx-drawable-canvas-testpage:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ngx-drawable-canvas-testpage/src/test.ts",
+            "polyfills": "projects/ngx-drawable-canvas-testpage/src/polyfills.ts",
+            "tsConfig": "projects/ngx-drawable-canvas-testpage/tsconfig.spec.json",
+            "karmaConfig": "projects/ngx-drawable-canvas-testpage/karma.conf.js",
+            "assets": [
+              "projects/ngx-drawable-canvas-testpage/src/favicon.ico",
+              "projects/ngx-drawable-canvas-testpage/src/assets"
+            ],
+            "styles": [
+              "projects/ngx-drawable-canvas-testpage/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ngx-drawable-canvas-testpage/tsconfig.app.json",
+              "projects/ngx-drawable-canvas-testpage/tsconfig.spec.json",
+              "projects/ngx-drawable-canvas-testpage/e2e/tsconfig.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/ngx-drawable-canvas-testpage/e2e/protractor.conf.js",
+            "devServerTarget": "ngx-drawable-canvas-testpage:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "ngx-drawable-canvas-testpage:serve:production"
+            }
+          }
+        }
+      }
+    }},
+  "defaultProject": "ngx-drawable-canvas"
+}
