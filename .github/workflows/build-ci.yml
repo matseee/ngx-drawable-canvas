@@ -18,8 +18,16 @@ jobs:
     - run: npm ci
     - run: npm run lint ngx-drawable-canvas
     - run: npm run build ngx-drawable-canvas --prod
-      
-  deploy:
+    - run: npm run build ngx-drawable-canvas-testpage --prod
+    
+    - name: Upload testpage artifact
+      if: github.ref == 'refs/heads/master'
+      uses: actions/upload-artifact@v1
+      with:
+        name: testpage-dist
+        path: ./dist/ngx-drawable-canvas-testpage
+              
+  deploy-testpage:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,10 +35,19 @@ jobs:
     needs: build
     if: github.ref == 'refs/heads/master'
     steps:
-      - run: npm ci
-      - run: npm run build ngx-drawable-canvas-testpage --prod
+      - name: Download testpage artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: testpage-dist
         
       - name: Upload to github-pages
         uses: crazy-max/ghaction-github-pages@v2.1.2
         with:
           build_dir: dist/ngx-drawable-canvas-testpage
+          
+      - name: Remove old artifacts
+        uses: c-hive/gha-remove-artifacts@v1
+        with:
+          age: '5 minute'
+          skip-tags: true
+          skip-recent: 2
