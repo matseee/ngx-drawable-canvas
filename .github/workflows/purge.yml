@@ -1,5 +1,4 @@
-  
-name: Remove old artifacts
+name: Purge Artifacts
 
 on:
   schedule:
@@ -15,6 +14,4 @@ jobs:
     - name: Remove old artifacts
       uses: c-hive/gha-remove-artifacts@v1
       with:
-        age: '1 day'
-        skip-tags: true
-        skip-recent: 1
+        age: '2 day'
