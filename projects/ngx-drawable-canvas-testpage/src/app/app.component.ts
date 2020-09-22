@@ -6,5 +6,9 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'ngx-drawable-canvas-testpage';
+
+  openGithub(): void {
+    window.open('https://github.com/matseee/ngx-drawable-canvas', '_blank');
+  }
+
 }

@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
-import { NgxDrawableCanvasComponent } from './ngx-drawable-canvas.component';
 
-
+import { NgxDrawableCanvasComponent } from './drawable-canvas.component';
 
 @NgModule({
   declarations: [NgxDrawableCanvasComponent],
