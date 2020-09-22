@@ -44,10 +44,9 @@ jobs:
         uses: crazy-max/ghaction-github-pages@v2.1.2
         with:
           build_dir: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Remove old artifacts
-        uses: c-hive/gha-remove-artifacts@v1
-        with:
-          age: '5 minute'
-          skip-tags: true
-          skip-recent: 2
+      - name: Delete Artifact
+        uses: GeekyEggo/delete-artifact@v1.0.0
+
