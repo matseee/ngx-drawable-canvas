@@ -43,19 +43,22 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
   }
 
   @HostListener('window:mousedown', ['$event'])
-  protected start(event: MouseEvent): void {
+  @HostListener('window:touchstart', ['$event'])
+  protected startMouse(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = true;
     this.setPosition(event);
   }
 
   @HostListener('window:mouseup', ['$event'])
-  protected stop(event: MouseEvent): void {
+  @HostListener('window:touchstop', ['$event'])
+  protected stopMouse(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
   }
 
   @HostListener('window:mousemove', ['$event'])
-  protected draw(event: MouseEvent): void {
+  @HostListener('window:touchmove', ['$event'])
+  protected drawMouse(event: MouseEvent | TouchEvent): void {
     if (!this.state.isDrawing) {
       return;
     }
@@ -72,10 +75,16 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
     this.context.stroke();
   }
 
-  protected setPosition(event: MouseEvent): void {
+  protected setPosition(event: MouseEvent | TouchEvent): void {
     const calculatedOffset = this.calculateOffset(this.canvasRef.nativeElement);
-    this.state.currentCoordinateX = event.clientX - calculatedOffset.left;
-    this.state.currentCoordinateY = event.clientY - calculatedOffset.top;
+
+    if (event instanceof MouseEvent) {
+      this.state.currentCoordinateX = event.clientX - calculatedOffset.left;
+      this.state.currentCoordinateY = event.clientY - calculatedOffset.top;
+    } else {
+      this.state.currentCoordinateX = event.touches[0].clientX - calculatedOffset.left;
+      this.state.currentCoordinateY = event.touches[0].clientY - calculatedOffset.top;
+    }
   }
 
   protected calculateOffset(element: HTMLElement): PositionOffset {
