@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
 
 import { DrawingState } from './models/drawing-state.model';
 import { PositionOffset } from './models/position-offset.model';
@@ -18,7 +18,7 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-
+    /** */
   }
 
   ngAfterViewInit(): void {
@@ -30,27 +30,31 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
       currentCoordinateY: 0,
     };
 
-    document.addEventListener('mousedown', this.start.bind(this));
-    document.addEventListener('mouseup', this.stop.bind(this));
-    document.addEventListener('mousemove', this.draw.bind(this));
-
-    this.resize();
+    this.resize(true);
   }
 
-  protected resize(): void {
-    this.canvasRef.nativeElement.height = this.elementRef.nativeElement.offsetHeight;
-    this.canvasRef.nativeElement.width = this.elementRef.nativeElement.offsetWidth;
+  @HostListener('window:resize')
+  protected resize(resizeHeight: boolean = false): void {
+    if (resizeHeight) {
+      this.canvasRef.nativeElement.height = this.elementRef.nativeElement.parentElement.offsetHeight;
+    }
+
+    this.canvasRef.nativeElement.width = this.elementRef.nativeElement.parentElement.offsetWidth;
   }
 
+  @HostListener('window:mousedown', ['$event'])
   protected start(event: MouseEvent): void {
     this.state.isDrawing = true;
     this.setPosition(event);
   }
 
+  @HostListener('window:mouseup', ['$event'])
   protected stop(event: MouseEvent): void {
     this.state.isDrawing = false;
+    this.context.closePath();
   }
 
+  @HostListener('window:mousemove', ['$event'])
   protected draw(event: MouseEvent): void {
     if (!this.state.isDrawing) {
       return;
