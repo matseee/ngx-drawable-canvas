@@ -33,11 +33,6 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
     };
 
     this.onResize(true);
-    this.registerMoveEvents();
-  }
-
-  protected registerMoveEvents(): void {
-    document.addEventListener('touchmove', this.onMove.bind(this), { passive: true });
   }
 
   @HostListener('document:resize')
@@ -52,23 +47,31 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
   @HostListener('document:mousedown', [ '$event' ])
   @HostListener('document:touchstart', [ '$event' ])
   protected onDown(event: MouseEvent | TouchEvent): void {
+    if (event instanceof TouchEvent) {
+      event.preventDefault();
+    }
+
     this.state.isDrawing = true;
     this.setPosition(event);
     this.eventCount++;
   }
 
   @HostListener('document:mouseup', [ '$event' ])
-  @HostListener('document:touchstop', [ '$event' ])
+  @HostListener('document:touchend', [ '$event' ])
   protected onStop(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
   }
 
   @HostListener('document:mousemove', [ '$event' ])
-  // @HostListener('document:touchmove', [ '$event' ])
+  @HostListener('document:touchmove', [ '$event' ])
   protected onMove(event: MouseEvent | TouchEvent): void {
     if (!this.state.isDrawing) {
       return;
+    }
+
+    if (event instanceof TouchEvent) {
+      event.preventDefault();
     }
 
     this.context.beginPath();
