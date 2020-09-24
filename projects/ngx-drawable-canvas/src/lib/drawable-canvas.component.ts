@@ -10,6 +10,8 @@ import { PositionOffset } from './models/position-offset.model';
 export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
   @ViewChild('canvas', { static: false }) protected canvasRef: ElementRef;
 
+  public eventCount = 0;
+
   protected context: CanvasRenderingContext2D;
   protected state: DrawingState;
 
@@ -30,11 +32,11 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
       currentCoordinateY: 0,
     };
 
-    this.resize(true);
+    this.onResize(true);
   }
 
   @HostListener('window:resize')
-  protected resize(resizeHeight: boolean = false): void {
+  protected onResize(resizeHeight: boolean = false): void {
     if (resizeHeight) {
       this.canvasRef.nativeElement.height = this.elementRef.nativeElement.parentElement.offsetHeight;
     }
@@ -42,23 +44,24 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
     this.canvasRef.nativeElement.width = this.elementRef.nativeElement.parentElement.offsetWidth;
   }
 
-  @HostListener('window:mousedown', ['$event'])
-  @HostListener('window:touchstart', ['$event'])
-  protected startMouse(event: MouseEvent | TouchEvent): void {
+  @HostListener('window:mousedown', [ '$event' ])
+  @HostListener('window:touchstart', [ '$event' ])
+  protected onDown(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = true;
     this.setPosition(event);
+    this.eventCount++;
   }
 
-  @HostListener('window:mouseup', ['$event'])
-  @HostListener('window:touchstop', ['$event'])
-  protected stopMouse(event: MouseEvent | TouchEvent): void {
+  @HostListener('window:mouseup', [ '$event' ])
+  @HostListener('window:touchstop', [ '$event' ])
+  protected onStop(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
   }
 
-  @HostListener('window:mousemove', ['$event'])
-  @HostListener('window:touchmove', ['$event'])
-  protected drawMouse(event: MouseEvent | TouchEvent): void {
+  @HostListener('window:mousemove', [ '$event' ])
+  @HostListener('window:touchmove', [ '$event' ])
+  protected onMove(event: MouseEvent | TouchEvent): void {
     if (!this.state.isDrawing) {
       return;
     }
@@ -82,8 +85,8 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
       this.state.currentCoordinateX = event.clientX - calculatedOffset.left;
       this.state.currentCoordinateY = event.clientY - calculatedOffset.top;
     } else {
-      this.state.currentCoordinateX = event.touches[0].clientX - calculatedOffset.left;
-      this.state.currentCoordinateY = event.touches[0].clientY - calculatedOffset.top;
+      this.state.currentCoordinateX = event.touches[ 0 ].clientX - calculatedOffset.left;
+      this.state.currentCoordinateY = event.touches[ 0 ].clientY - calculatedOffset.top;
     }
   }
 
