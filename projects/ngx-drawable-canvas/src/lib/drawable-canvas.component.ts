@@ -33,9 +33,14 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
     };
 
     this.onResize(true);
+    this.registerMoveEvents();
   }
 
-  @HostListener('window:resize')
+  protected registerMoveEvents(): void {
+    document.addEventListener('touchmove', this.onMove.bind(this), { passive: true });
+  }
+
+  @HostListener('document:resize')
   protected onResize(resizeHeight: boolean = false): void {
     if (resizeHeight) {
       this.canvasRef.nativeElement.height = this.elementRef.nativeElement.parentElement.offsetHeight;
@@ -44,23 +49,23 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
     this.canvasRef.nativeElement.width = this.elementRef.nativeElement.parentElement.offsetWidth;
   }
 
-  @HostListener('window:mousedown', [ '$event' ])
-  @HostListener('window:touchstart', [ '$event' ])
+  @HostListener('document:mousedown', [ '$event' ])
+  @HostListener('document:touchstart', [ '$event' ])
   protected onDown(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = true;
     this.setPosition(event);
     this.eventCount++;
   }
 
-  @HostListener('window:mouseup', [ '$event' ])
-  @HostListener('window:touchstop', [ '$event' ])
+  @HostListener('document:mouseup', [ '$event' ])
+  @HostListener('document:touchstop', [ '$event' ])
   protected onStop(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
   }
 
-  @HostListener('window:mousemove', [ '$event' ])
-  @HostListener('window:touchmove', [ '$event' ])
+  @HostListener('document:mousemove', [ '$event' ])
+  // @HostListener('document:touchmove', [ '$event' ])
   protected onMove(event: MouseEvent | TouchEvent): void {
     if (!this.state.isDrawing) {
       return;
