@@ -76,6 +76,8 @@ export class NgxDrawableCanvasComponent implements OnInit, AfterViewInit {
 
     this.context.lineTo(this.state.currentCoordinateX, this.state.currentCoordinateY);
     this.context.stroke();
+
+    this.eventCount++;
   }
 
   protected setPosition(event: MouseEvent | TouchEvent): void {
