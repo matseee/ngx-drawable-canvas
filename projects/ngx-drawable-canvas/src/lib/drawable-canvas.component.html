@@ -1,4 +1,4 @@
-<div>
-  <canvas #canvas style="border: 1px solid black"></canvas>
-  <p>EventCount: {{ eventCount }}</p>
+<div class="container">
+  <ngx-control-panel *ngIf="displayToolbar"></ngx-control-panel>
+  <ngx-draw-surface></ngx-draw-surface>
 </div>
