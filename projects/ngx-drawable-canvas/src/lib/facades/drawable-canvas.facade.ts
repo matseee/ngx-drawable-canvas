@@ -5,6 +5,8 @@ import { PositionOffset } from './../models/position-offset.model';
 
 @Injectable()
 export class DrawableCanvasFacade {
+  protected statesStack: any[] = [];
+
   canvasRef: ElementRef<HTMLCanvasElement>;
   context: CanvasRenderingContext2D;
 
@@ -31,6 +33,7 @@ export class DrawableCanvasFacade {
   stopMouse(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
+    this.pushState();
   }
 
   drawMouse(event: MouseEvent | TouchEvent): void {
@@ -52,6 +55,18 @@ export class DrawableCanvasFacade {
     this.context.stroke();
   }
 
+  back(): void {
+    if (this.statesStack.length > 1) {
+      this.statesStack.pop();
+      this.context.putImageData(
+        this.statesStack[this.statesStack.length - 1],
+        0, 0,
+        0, 0,
+        this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height
+      );
+    }
+  }
+
   protected setPosition(event: MouseEvent | TouchEvent): void {
     const calculatedOffset = this.calculateOffset(this.canvasRef.nativeElement);
 
@@ -62,6 +77,10 @@ export class DrawableCanvasFacade {
       this.state.currentCoordinateX = event.touches[0].clientX - calculatedOffset.left;
       this.state.currentCoordinateY = event.touches[0].clientY - calculatedOffset.top;
     }
+  }
+
+  protected pushState(): void {
+    this.statesStack.push(this.context.getImageData(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height));
   }
 
   protected calculateOffset(element: HTMLElement): PositionOffset {
