@@ -38,6 +38,8 @@ export class DrawableCanvasFacade {
       return;
     }
 
+    event.preventDefault();
+
     this.context.beginPath();
     this.context.lineWidth = 5;
     this.context.lineCap = 'round';
