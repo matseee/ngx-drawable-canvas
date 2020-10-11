@@ -2,17 +2,20 @@ import { ElementRef, Injectable } from '@angular/core';
 
 import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
+import { CoordinateService } from './../services/coordinate.service';
+import { ImageStackService } from './../services/image-stack.service';
 
 @Injectable()
 export class DrawableCanvasFacade {
-  protected statesStack: any[] = [];
-
   canvasRef: ElementRef<HTMLCanvasElement>;
   context: CanvasRenderingContext2D;
 
   state: DrawingState;
 
-  constructor() { }
+  constructor(
+    protected coordinate: CoordinateService,
+    protected imageStack: ImageStackService,
+  ) { }
 
   initialize(canvasRef: ElementRef<HTMLCanvasElement>): void {
     this.canvasRef = canvasRef;
@@ -20,20 +23,30 @@ export class DrawableCanvasFacade {
 
     this.state = {
       isDrawing: false,
-      currentCoordinateX: 0,
-      currentCoordinateY: 0,
+      canvasOffset: new PositionOffset(),
+      currentPosition: {
+        x: 0,
+        y: 0,
+      },
     };
+
+    this.coordinate.initialize(this);
+    this.imageStack.initialize(this);
   }
 
   startMouse(event: MouseEvent | TouchEvent): void {
-    this.state.isDrawing = true;
-    this.setPosition(event);
+    this.state.canvasOffset = this.coordinate.calculateOffset(this.canvasRef.nativeElement);
+    this.coordinate.setPosition(event);
+
+    if (this.coordinate.checkInsideCanvas()) {
+      this.state.isDrawing = true;
+      this.imageStack.save();
+    }
   }
 
   stopMouse(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
-    this.pushState();
   }
 
   drawMouse(event: MouseEvent | TouchEvent): void {
@@ -48,50 +61,14 @@ export class DrawableCanvasFacade {
     this.context.lineCap = 'round';
     this.context.strokeStyle = 'green';
 
-    this.context.moveTo(this.state.currentCoordinateX, this.state.currentCoordinateY);
-    this.setPosition(event);
+    this.context.moveTo(this.state.currentPosition.x, this.state.currentPosition.y);
+    this.coordinate.setPosition(event);
 
-    this.context.lineTo(this.state.currentCoordinateX, this.state.currentCoordinateY);
+    this.context.lineTo(this.state.currentPosition.x, this.state.currentPosition.y);
     this.context.stroke();
   }
 
   back(): void {
-    if (this.statesStack.length > 1) {
-      this.statesStack.pop();
-      this.context.putImageData(
-        this.statesStack[this.statesStack.length - 1],
-        0, 0,
-        0, 0,
-        this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height
-      );
-    }
-  }
-
-  protected setPosition(event: MouseEvent | TouchEvent): void {
-    const calculatedOffset = this.calculateOffset(this.canvasRef.nativeElement);
-
-    if (event instanceof MouseEvent) {
-      this.state.currentCoordinateX = event.clientX - calculatedOffset.left;
-      this.state.currentCoordinateY = event.clientY - calculatedOffset.top;
-    } else {
-      this.state.currentCoordinateX = event.touches[0].clientX - calculatedOffset.left;
-      this.state.currentCoordinateY = event.touches[0].clientY - calculatedOffset.top;
-    }
-  }
-
-  protected pushState(): void {
-    this.statesStack.push(this.context.getImageData(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height));
-  }
-
-  protected calculateOffset(element: HTMLElement): PositionOffset {
-    let offset = new PositionOffset();
-    offset.left = element.offsetLeft;
-    offset.top = element.offsetTop;
-
-    if (element.offsetParent) {
-      offset = offset.add(this.calculateOffset(element.offsetParent as HTMLElement));
-    }
-
-    return offset;
+    this.imageStack.back();
   }
 }
