@@ -22,18 +22,24 @@ export class DrawableCanvasFacade {
       isDrawing: false,
       currentCoordinateX: 0,
       currentCoordinateY: 0,
+
+      canvasOffset: new PositionOffset(),
     };
   }
 
   startMouse(event: MouseEvent | TouchEvent): void {
-    this.state.isDrawing = true;
+    this.state.canvasOffset = this.calculateOffset(this.canvasRef.nativeElement);
     this.setPosition(event);
+
+    if (this.checkInsideCanvas()) {
+      this.state.isDrawing = true;
+      this.pushState();
+    }
   }
 
   stopMouse(event: MouseEvent | TouchEvent): void {
     this.state.isDrawing = false;
     this.context.closePath();
-    this.pushState();
   }
 
   drawMouse(event: MouseEvent | TouchEvent): void {
@@ -56,10 +62,10 @@ export class DrawableCanvasFacade {
   }
 
   back(): void {
-    if (this.statesStack.length > 1) {
-      this.statesStack.pop();
+    if (this.statesStack.length > 0) {
+      const lastImage = this.statesStack.pop();
       this.context.putImageData(
-        this.statesStack[this.statesStack.length - 1],
+        lastImage,
         0, 0,
         0, 0,
         this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height
@@ -68,19 +74,24 @@ export class DrawableCanvasFacade {
   }
 
   protected setPosition(event: MouseEvent | TouchEvent): void {
-    const calculatedOffset = this.calculateOffset(this.canvasRef.nativeElement);
-
     if (event instanceof MouseEvent) {
-      this.state.currentCoordinateX = event.clientX - calculatedOffset.left;
-      this.state.currentCoordinateY = event.clientY - calculatedOffset.top;
+      this.state.currentCoordinateX = event.clientX - this.state.canvasOffset.left;
+      this.state.currentCoordinateY = event.clientY - this.state.canvasOffset.top;
     } else {
-      this.state.currentCoordinateX = event.touches[0].clientX - calculatedOffset.left;
-      this.state.currentCoordinateY = event.touches[0].clientY - calculatedOffset.top;
+      this.state.currentCoordinateX = event.touches[0].clientX - this.state.canvasOffset.left;
+      this.state.currentCoordinateY = event.touches[0].clientY - this.state.canvasOffset.top;
     }
+  }
+
+  protected checkInsideCanvas(): boolean {
+    return (this.state.currentCoordinateX >= 0 && this.state.currentCoordinateX <= this.canvasRef.nativeElement.width
+      && this.state.currentCoordinateY >= 0 && this.state.currentCoordinateY <= this.canvasRef.nativeElement.height);
   }
 
   protected pushState(): void {
     this.statesStack.push(this.context.getImageData(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height));
+    console.log('ImageStackCount: ', this.statesStack.length);
+    console.log('LastImage', this.statesStack[this.statesStack.length - 1]);
   }
 
   protected calculateOffset(element: HTMLElement): PositionOffset {
