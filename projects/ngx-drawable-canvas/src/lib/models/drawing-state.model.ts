@@ -1,9 +1,9 @@
 import { PositionOffset } from './position-offset.model';
+import { Position } from './position.model';
 
 export interface DrawingState {
   isDrawing: boolean;
-  currentCoordinateX: number;
-  currentCoordinateY: number;
 
+  currentPosition: Position;
   canvasOffset: PositionOffset;
 }
