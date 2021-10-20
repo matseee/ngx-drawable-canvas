@@ -1,10 +1,11 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
-
 import { DrawableCanvasFacade } from './../../facades/drawable-canvas.facade';
+
 
 @Component({
   selector: 'ngx-draw-surface',
-  templateUrl: './draw-surface.component.html'
+  templateUrl: './draw-surface.component.html',
+  styleUrls: ['./draw-surface.component.scss']
 })
 
 export class DrawSurfaceComponent implements OnInit, AfterViewInit {
