@@ -37,8 +37,9 @@ export class DrawableCanvasFacade {
   }
 
   startMouse(event: MouseEvent | TouchEvent): void {
-    if (!this.state.isEnabled)
+    if (!this.state.isEnabled) {
       return;
+    }
 
     this.state.canvasOffset = this.coordinate.calculateOffset(this.canvasRef.nativeElement);
     this.coordinate.setPosition(event);
@@ -50,8 +51,9 @@ export class DrawableCanvasFacade {
   }
 
   stopMouse(event: MouseEvent | TouchEvent): void {
-    if (!this.state.isEnabled)
+    if (!this.state.isEnabled) {
       return;
+    }
 
     this.state.isDrawing = false;
     this.context.closePath();
