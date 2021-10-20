@@ -4,8 +4,7 @@ import { DrawableCanvasFacade } from './../../facades/drawable-canvas.facade';
 
 @Component({
   selector: 'ngx-draw-surface',
-  templateUrl: './draw-surface.component.html',
-  styleUrls: ['./draw-surface.component.scss']
+  templateUrl: './draw-surface.component.html'
 })
 
 export class DrawSurfaceComponent implements OnInit, AfterViewInit {
@@ -37,18 +36,24 @@ export class DrawSurfaceComponent implements OnInit, AfterViewInit {
   @HostListener('window:mousedown', ['$event'])
   @HostListener('window:touchstart', ['$event'])
   protected startMouse(event: MouseEvent | TouchEvent): void {
-    this.drawableCanvasFacade.startMouse(event);
+    if (this.drawableCanvasFacade.state.isEnabled) {
+      this.drawableCanvasFacade.startMouse(event);
+    }
   }
 
   @HostListener('window:mouseup', ['$event'])
   @HostListener('window:touchstop', ['$event'])
   protected stopMouse(event: MouseEvent | TouchEvent): void {
-    this.drawableCanvasFacade.stopMouse(event);
+    if (this.drawableCanvasFacade.state.isEnabled) {
+      this.drawableCanvasFacade.stopMouse(event);
+    }
   }
 
   @HostListener('window:mousemove', ['$event'])
   @HostListener('window:touchmove', ['$event'])
   protected drawMouse(event: MouseEvent | TouchEvent): void {
-    this.drawableCanvasFacade.drawMouse(event);
+    if (this.drawableCanvasFacade.state.isEnabled) {
+      this.drawableCanvasFacade.drawMouse(event);
+    }
   }
 }

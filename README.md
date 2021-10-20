@@ -20,3 +20,6 @@ Example-application:
 ```bash
 ng serve ngx-drawable-canvas-testpage
 ```
+
+## credits
+- Built with https://github.com/Sphinxxxx/vanilla-picker by Andreas Borgen

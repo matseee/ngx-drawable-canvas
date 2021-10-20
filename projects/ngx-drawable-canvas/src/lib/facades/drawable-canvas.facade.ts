@@ -1,9 +1,9 @@
 import { ElementRef, Injectable } from '@angular/core';
-
 import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
 import { CoordinateService } from './../services/coordinate.service';
 import { ImageStackService } from './../services/image-stack.service';
+
 
 @Injectable()
 export class DrawableCanvasFacade {
@@ -22,7 +22,9 @@ export class DrawableCanvasFacade {
     this.context = this.canvasRef.nativeElement.getContext('2d');
 
     this.state = {
+      isEnabled: true,
       isDrawing: false,
+      color: '#00ccffff',
       canvasOffset: new PositionOffset(),
       currentPosition: {
         x: 0,
@@ -35,6 +37,9 @@ export class DrawableCanvasFacade {
   }
 
   startMouse(event: MouseEvent | TouchEvent): void {
+    if (!this.state.isEnabled)
+      return;
+
     this.state.canvasOffset = this.coordinate.calculateOffset(this.canvasRef.nativeElement);
     this.coordinate.setPosition(event);
 
@@ -45,12 +50,15 @@ export class DrawableCanvasFacade {
   }
 
   stopMouse(event: MouseEvent | TouchEvent): void {
+    if (!this.state.isEnabled)
+      return;
+
     this.state.isDrawing = false;
     this.context.closePath();
   }
 
   drawMouse(event: MouseEvent | TouchEvent): void {
-    if (!this.state.isDrawing) {
+    if (!this.state.isEnabled || !this.state.isDrawing) {
       return;
     }
 
@@ -59,7 +67,7 @@ export class DrawableCanvasFacade {
     this.context.beginPath();
     this.context.lineWidth = 5;
     this.context.lineCap = 'round';
-    this.context.strokeStyle = 'green';
+    this.context.strokeStyle = this.state.color;
 
     this.context.moveTo(this.state.currentPosition.x, this.state.currentPosition.y);
     this.coordinate.setPosition(event);
@@ -70,5 +78,13 @@ export class DrawableCanvasFacade {
 
   back(): void {
     this.imageStack.back();
+  }
+
+  setColor(color: string): void {
+    this.state.color = color;
+  }
+
+  setEnabled(enabled: boolean): void {
+    this.state.isEnabled = enabled;
   }
 }
