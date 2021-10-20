@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, ViewChild } from '@angular/core';
 import { DrawableCanvasFacade } from './../../facades/drawable-canvas.facade';
 
 
@@ -7,17 +7,16 @@ import { DrawableCanvasFacade } from './../../facades/drawable-canvas.facade';
   templateUrl: './draw-surface.component.html'
 })
 
-export class DrawSurfaceComponent implements OnInit, AfterViewInit {
+export class DrawSurfaceComponent implements AfterViewInit {
   @ViewChild('canvas', { static: false }) protected canvasRef: ElementRef;
+
+  public height: string;
+  public width: string;
 
   constructor(
     protected elementRef: ElementRef,
     protected drawableCanvasFacade: DrawableCanvasFacade,
   ) { }
-
-  ngOnInit(): void {
-    /** */
-  }
 
   ngAfterViewInit(): void {
     this.drawableCanvasFacade.initialize(this.canvasRef);
@@ -26,11 +25,17 @@ export class DrawSurfaceComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:resize')
   protected resize(resizeHeight: boolean = false): void {
-    if (resizeHeight) {
-      this.canvasRef.nativeElement.height = this.elementRef.nativeElement.parentElement.offsetHeight;
+    if (!this.canvasRef) {
+      return;
     }
 
-    this.canvasRef.nativeElement.width = this.elementRef.nativeElement.parentElement.offsetWidth;
+    if (resizeHeight) {
+      this.height = (this.elementRef.nativeElement.parentElement.offsetHeight
+        - this.elementRef.nativeElement.parentElement.offsetTop).toString();
+    }
+
+    this.width = (this.elementRef.nativeElement.parentElement.offsetWidth
+      - this.elementRef.nativeElement.parentElement.offsetLeft / 2).toString();
   }
 
   @HostListener('window:mousedown', ['$event'])
