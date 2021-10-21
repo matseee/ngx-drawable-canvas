@@ -7,7 +7,7 @@ export class PositionOffset {
     this.top = 0;
   }
 
-  add(offset: PositionOffset): PositionOffset {
+  public add(offset: PositionOffset): PositionOffset {
     const result = new PositionOffset();
     result.left = this.left + offset.left;
     result.top = this.top + offset.top;
