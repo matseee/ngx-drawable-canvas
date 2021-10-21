@@ -1,4 +1,5 @@
 import { ElementRef, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
 import { CoordinateService } from './../services/coordinate.service';
@@ -7,42 +8,36 @@ import { ImageStackService } from './../services/image-stack.service';
 
 @Injectable()
 export class DrawableCanvasFacade {
-  canvasRef: ElementRef<HTMLCanvasElement>;
-  context: CanvasRenderingContext2D;
+  public canvasRef: ElementRef<HTMLCanvasElement>;
+  public context: CanvasRenderingContext2D;
 
-  state: DrawingState;
+  public state$: Observable<DrawingState>;
+
+  protected state: DrawingState;
+  protected stateSubject: BehaviorSubject<DrawingState>;
 
   constructor(
     protected coordinate: CoordinateService,
     protected imageStack: ImageStackService,
-  ) { }
+  ) {
+    this.initializeState();
+  }
 
-  initialize(canvasRef: ElementRef<HTMLCanvasElement>): void {
+  public initialize(canvasRef: ElementRef<HTMLCanvasElement>): void {
     this.canvasRef = canvasRef;
     this.context = this.canvasRef.nativeElement.getContext('2d');
-
-    this.state = {
-      isEnabled: true,
-      isDrawing: false,
-      color: '#00ccffff',
-      canvasOffset: new PositionOffset(),
-      currentPosition: {
-        x: 0,
-        y: 0,
-      },
-    };
 
     this.coordinate.initialize(this);
     this.imageStack.initialize(this);
   }
 
-  startMouse(event: MouseEvent | TouchEvent): void {
+  public startMouse(event: MouseEvent | TouchEvent): void {
     if (!this.state.isEnabled) {
       return;
     }
 
     this.state.canvasOffset = this.coordinate.calculateOffset(this.canvasRef.nativeElement);
-    this.coordinate.setPosition(event);
+    this.updateState({ ...this.state, currentPosition: this.coordinate.setPosition(event) });
 
     if (this.coordinate.checkInsideCanvas()) {
       this.state.isDrawing = true;
@@ -50,7 +45,7 @@ export class DrawableCanvasFacade {
     }
   }
 
-  stopMouse(event: MouseEvent | TouchEvent): void {
+  public stopMouse(event: MouseEvent | TouchEvent): void {
     if (!this.state.isEnabled) {
       return;
     }
@@ -59,7 +54,7 @@ export class DrawableCanvasFacade {
     this.context.closePath();
   }
 
-  drawMouse(event: MouseEvent | TouchEvent): void {
+  public drawMouse(event: MouseEvent | TouchEvent): void {
     if (!this.state.isEnabled || !this.state.isDrawing) {
       return;
     }
@@ -67,26 +62,51 @@ export class DrawableCanvasFacade {
     event.preventDefault();
 
     this.context.beginPath();
-    this.context.lineWidth = 5;
     this.context.lineCap = 'round';
-    this.context.strokeStyle = this.state.color;
+    this.context.lineWidth = this.state.strokeSize;
+    this.context.strokeStyle = this.state.strokeColor;
 
     this.context.moveTo(this.state.currentPosition.x, this.state.currentPosition.y);
-    this.coordinate.setPosition(event);
+    this.updateState({ ...this.state, currentPosition: this.coordinate.setPosition(event) });
 
     this.context.lineTo(this.state.currentPosition.x, this.state.currentPosition.y);
     this.context.stroke();
   }
 
-  back(): void {
+  public back(): void {
     this.imageStack.back();
   }
 
-  setColor(color: string): void {
-    this.state.color = color;
+  public setStrokeColor(strokeColor: string): void {
+    this.updateState({ ...this.state, strokeColor });
   }
 
-  setEnabled(enabled: boolean): void {
-    this.state.isEnabled = enabled;
+  public setStrokeSize(strokeSize: number): void {
+    this.updateState({ ...this.state, strokeSize });
+  }
+
+  public setEnabled(isEnabled: boolean): void {
+    this.updateState({ ...this.state, isEnabled });
+  }
+
+  protected initializeState(): void {
+    this.state = {
+      isEnabled: true,
+      isDrawing: false,
+      strokeColor: '#00ccffff',
+      strokeSize: 5,
+      canvasOffset: new PositionOffset(),
+      currentPosition: {
+        x: 0,
+        y: 0,
+      },
+    };
+
+    this.stateSubject = new BehaviorSubject(this.state);
+    this.state$ = this.stateSubject.asObservable();
+  }
+
+  protected updateState(state: DrawingState): void {
+    this.stateSubject.next(this.state = state);
   }
 }

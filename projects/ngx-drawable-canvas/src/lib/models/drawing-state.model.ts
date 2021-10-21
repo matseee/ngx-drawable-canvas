@@ -6,7 +6,8 @@ export interface DrawingState {
 
   isDrawing: boolean;
 
-  color: string;
+  strokeColor: string;
+  strokeSize: number;
 
   currentPosition: Position;
   canvasOffset: PositionOffset;

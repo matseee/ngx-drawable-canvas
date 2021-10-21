@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import Picker from 'vanilla-picker';
 import { DrawableCanvasFacade } from './../../facades/drawable-canvas.facade';
 
@@ -9,26 +9,24 @@ import { DrawableCanvasFacade } from './../../facades/drawable-canvas.facade';
   styleUrls: ['./control-panel.component.scss']
 })
 
-export class ControlPanelComponent implements OnInit {
+export class ControlPanelComponent {
   @ViewChild('colorPicker', { static: false }) protected colorPickerRef: ElementRef;
 
-  colorPicker: Picker;
+  public colorPicker: Picker;
 
   constructor(
-    protected drawableCanvasFacade: DrawableCanvasFacade,
+    public drawableCanvasFacade: DrawableCanvasFacade,
   ) { }
 
-  ngOnInit(): void { }
-
-  onBackClicked(): void {
+  public onBackClicked(): void {
     this.drawableCanvasFacade.back();
   }
 
-  onChooseColor(): void {
+  public onChooseColor(): void {
     if (!this.colorPicker) {
       this.colorPicker = new Picker({
         parent: this.colorPickerRef.nativeElement,
-        onDone: (color: any) => { this.drawableCanvasFacade.setColor(color.rgbaString); },
+        onDone: (color: any) => { this.drawableCanvasFacade.setStrokeColor(color.rgbaString); },
         onClose: () => { this.drawableCanvasFacade.setEnabled(true); }
       });
     }

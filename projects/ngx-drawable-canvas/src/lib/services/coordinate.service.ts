@@ -1,36 +1,44 @@
 import { Injectable } from '@angular/core';
-
 import { DrawableCanvasFacade } from './../facades/drawable-canvas.facade';
+import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
+import { Position } from './../models/position.model';
+
 
 @Injectable()
 export class CoordinateService {
+  protected state: DrawingState;
   protected drawingCanvasFacade: DrawableCanvasFacade;
 
   constructor() { }
 
-  initialize(drawingCanvasFacade: DrawableCanvasFacade): void {
+  public initialize(drawingCanvasFacade: DrawableCanvasFacade): void {
     this.drawingCanvasFacade = drawingCanvasFacade;
+    this.drawingCanvasFacade.state$.subscribe((state: DrawingState) => this.state = state);
   }
 
-  setPosition(event: MouseEvent | TouchEvent): void {
+  public setPosition(event: MouseEvent | TouchEvent): Position {
     if (event instanceof MouseEvent) {
-      this.drawingCanvasFacade.state.currentPosition.x = event.clientX - this.drawingCanvasFacade.state.canvasOffset.left;
-      this.drawingCanvasFacade.state.currentPosition.y = event.clientY - this.drawingCanvasFacade.state.canvasOffset.top;
+      return {
+        x: event.clientX - this.state.canvasOffset.left,
+        y: event.clientY - this.state.canvasOffset.top,
+      };
     } else {
-      this.drawingCanvasFacade.state.currentPosition.x = event.touches[0].clientX - this.drawingCanvasFacade.state.canvasOffset.left;
-      this.drawingCanvasFacade.state.currentPosition.y = event.touches[0].clientY - this.drawingCanvasFacade.state.canvasOffset.top;
+      return {
+        x: event.touches[0].clientX - this.state.canvasOffset.left,
+        y: event.touches[0].clientY - this.state.canvasOffset.top,
+      };
     }
   }
 
-  checkInsideCanvas(): boolean {
-    return (this.drawingCanvasFacade.state.currentPosition.x >= 0
-      && this.drawingCanvasFacade.state.currentPosition.x <= this.drawingCanvasFacade.canvasRef.nativeElement.width
-      && this.drawingCanvasFacade.state.currentPosition.y >= 0
-      && this.drawingCanvasFacade.state.currentPosition.y <= this.drawingCanvasFacade.canvasRef.nativeElement.height);
+  public checkInsideCanvas(): boolean {
+    return (this.state.currentPosition.x >= 0
+      && this.state.currentPosition.x <= this.drawingCanvasFacade.canvasRef.nativeElement.width
+      && this.state.currentPosition.y >= 0
+      && this.state.currentPosition.y <= this.drawingCanvasFacade.canvasRef.nativeElement.height);
   }
 
-  calculateOffset(element: HTMLElement): PositionOffset {
+  public calculateOffset(element: HTMLElement): PositionOffset {
     let offset = new PositionOffset();
     offset.left = element.offsetLeft;
     offset.top = element.offsetTop;
