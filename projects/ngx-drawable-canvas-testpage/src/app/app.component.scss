@@ -2,10 +2,12 @@
   flex: 1 1 auto;
 }
 
-mat-card {
-  margin: 16px;
+.container {
+  display: inline-block;
+  height: calc(100% - 64px);
+  width: 100%;
+}
 
-  .container {
-    height: 400px;
-  }
+ngx-drawable-canvas {
+
 }
