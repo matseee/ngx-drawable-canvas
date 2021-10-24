@@ -17,7 +17,7 @@ export class CoordinateService {
     this.drawingCanvasFacade.state$.subscribe((state: DrawingState) => this.state = state);
   }
 
-  public setPosition(event: MouseEvent | TouchEvent): Position {
+  public getPosition(event: MouseEvent | TouchEvent): Position {
     if (event instanceof MouseEvent) {
       return {
         x: event.clientX - this.state.canvasOffset.left,

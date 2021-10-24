@@ -6,7 +6,6 @@ import { DrawSurfaceComponent } from './components/draw-surface/draw-surface.com
 import { NgxDrawableCanvasComponent } from './drawable-canvas.component';
 import { DrawableCanvasFacade } from './facades/drawable-canvas.facade';
 import { CoordinateService } from './services/coordinate.service';
-import { ImageStackService } from './services/image-stack.service';
 
 
 @NgModule({
@@ -26,7 +25,6 @@ import { ImageStackService } from './services/image-stack.service';
   providers: [
     CoordinateService,
     DrawableCanvasFacade,
-    ImageStackService,
   ]
 })
 export class NgxDrawableCanvasModule { }

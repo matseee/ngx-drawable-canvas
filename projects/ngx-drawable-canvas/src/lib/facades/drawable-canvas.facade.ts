@@ -1,9 +1,10 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { DrawingLine } from '../models/drawing-line.model';
+import { DrawingLineStep } from './../models/drawing-line-step.model';
 import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
 import { CoordinateService } from './../services/coordinate.service';
-import { ImageStackService } from './../services/image-stack.service';
 
 
 @Injectable()
@@ -13,12 +14,14 @@ export class DrawableCanvasFacade {
 
   public state$: Observable<DrawingState>;
 
+  public lines: DrawingLine[];
+  public currentLine: DrawingLine;
+
   protected state: DrawingState;
   protected stateSubject: BehaviorSubject<DrawingState>;
 
   constructor(
     protected coordinate: CoordinateService,
-    protected imageStack: ImageStackService,
   ) {
     this.initializeState();
   }
@@ -27,8 +30,9 @@ export class DrawableCanvasFacade {
     this.canvasRef = canvasRef;
     this.context = this.canvasRef.nativeElement.getContext('2d');
 
+    this.lines = [];
+
     this.coordinate.initialize(this);
-    this.imageStack.initialize(this);
   }
 
   public startMouse(event: MouseEvent | TouchEvent): void {
@@ -36,12 +40,24 @@ export class DrawableCanvasFacade {
       return;
     }
 
-    this.state.canvasOffset = this.coordinate.calculateOffset(this.canvasRef.nativeElement);
-    this.updateState({ ...this.state, currentPosition: this.coordinate.setPosition(event) });
+    this.updateState({
+      ...this.state,
+      canvasOffset: this.coordinate.calculateOffset(this.canvasRef.nativeElement)
+    });
+
+    this.updateState({
+      ...this.state,
+      currentPosition: this.coordinate.getPosition(event)
+    });
 
     if (this.coordinate.checkInsideCanvas()) {
       this.state.isDrawing = true;
-      this.imageStack.save();
+
+      this.currentLine = {
+        lineWidth: this.state.strokeSize,
+        strokeColor: this.state.strokeColor,
+        steps: []
+      };
     }
   }
 
@@ -50,8 +66,11 @@ export class DrawableCanvasFacade {
       return;
     }
 
+    if (this.currentLine && this.state.isDrawing) {
+      this.lines.push(this.currentLine);
+    }
+
     this.state.isDrawing = false;
-    this.context.closePath();
   }
 
   public drawMouse(event: MouseEvent | TouchEvent): void {
@@ -61,20 +80,43 @@ export class DrawableCanvasFacade {
 
     event.preventDefault();
 
+    const step: DrawingLineStep = {
+      start: this.state.currentPosition,
+      end: this.coordinate.getPosition(event)
+    };
+
+    this.updateState({ ...this.state, currentPosition: step.end });
+
+    this.renderStep(this.currentLine, step);
+    this.currentLine.steps.push(step);
+  }
+
+  public renderLine(line: DrawingLine): void {
+    for (const step of line.steps) {
+      this.renderStep(line, step);
+    }
+  }
+
+  public renderStep(line: DrawingLine, step: DrawingLineStep): void {
     this.context.beginPath();
     this.context.lineCap = 'round';
-    this.context.lineWidth = this.state.strokeSize;
-    this.context.strokeStyle = this.state.strokeColor;
-
-    this.context.moveTo(this.state.currentPosition.x, this.state.currentPosition.y);
-    this.updateState({ ...this.state, currentPosition: this.coordinate.setPosition(event) });
-
-    this.context.lineTo(this.state.currentPosition.x, this.state.currentPosition.y);
+    this.context.lineWidth = line.lineWidth;
+    this.context.strokeStyle = line.strokeColor;
+    this.context.moveTo(step.start.x, step.start.y);
+    this.context.lineTo(step.end.x, step.end.y);
     this.context.stroke();
+    this.context.closePath();
   }
 
   public back(): void {
-    this.imageStack.back();
+    if (this.lines.length > 0) {
+      this.context.clearRect(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height);
+      this.lines.pop();
+
+      for (const line of this.lines) {
+        this.renderLine(line);
+      }
+    }
   }
 
   public setStrokeColor(strokeColor: string): void {
