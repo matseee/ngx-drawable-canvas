@@ -1,7 +1,8 @@
 import { ElementRef, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { DrawingLine } from '../models/drawing-line.model';
+import { DrawingMode } from '../enums/drawing-mode.enum';
 import { DrawingLineStep } from './../models/drawing-line-step.model';
+import { DrawingLine } from './../models/drawing-line.model';
 import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
 import { CoordinateService } from './../services/coordinate.service';
@@ -14,8 +15,8 @@ export class DrawableCanvasFacade {
 
   public state$: Observable<DrawingState>;
 
-  public lines: DrawingLine[];
-  public currentLine: DrawingLine;
+  // public lines: DrawingLine[];
+  // public currentLine: DrawingLine;
 
   protected state: DrawingState;
   protected stateSubject: BehaviorSubject<DrawingState>;
@@ -29,8 +30,6 @@ export class DrawableCanvasFacade {
   public initialize(canvasRef: ElementRef<HTMLCanvasElement>): void {
     this.canvasRef = canvasRef;
     this.context = this.canvasRef.nativeElement.getContext('2d');
-
-    this.lines = [];
 
     this.coordinate.initialize(this);
   }
@@ -47,17 +46,50 @@ export class DrawableCanvasFacade {
 
     this.updateState({
       ...this.state,
-      currentPosition: this.coordinate.getPosition(event)
+      startPosition: this.coordinate.getPosition(event)
     });
 
-    if (this.coordinate.checkInsideCanvas()) {
-      this.state.isDrawing = true;
+    if (this.coordinate.checkInsideCanvas(this.state.startPosition)) {
+      this.updateState({
+        ...this.state,
+        isDrawing: true,
+        currentLine: {
+          lineWidth: this.state.strokeSize,
+          strokeColor: this.state.strokeColor,
+          steps: []
+        }
+      });
+    }
+  }
 
-      this.currentLine = {
-        lineWidth: this.state.strokeSize,
-        strokeColor: this.state.strokeColor,
-        steps: []
+  public moveMouse(event: MouseEvent | TouchEvent): void {
+    if (!this.state.isEnabled || !this.state.isDrawing) {
+      return;
+    }
+
+    event.preventDefault();
+
+    this.updateState({
+      ...this.state,
+      endPosition: this.coordinate.getPosition(event)
+    });
+
+    if (this.state.mode === DrawingMode.drawing) {
+      const step: DrawingLineStep = {
+        start: this.state.startPosition,
+        end: this.state.endPosition
       };
+
+      this.renderStep(this.state.currentLine, step);
+      this.state.currentLine.steps.push(step);
+
+      this.updateState({
+        ...this.state,
+        startPosition: this.state.endPosition,
+        endPosition: null,
+      });
+    } else {
+      this.renderSelectionRect();
     }
   }
 
@@ -66,29 +98,16 @@ export class DrawableCanvasFacade {
       return;
     }
 
-    if (this.currentLine && this.state.isDrawing) {
-      this.lines.push(this.currentLine);
+    if (this.state.currentLine && this.state.isDrawing) {
+      this.state.lines.push(this.state.currentLine);
     }
 
-    this.state.isDrawing = false;
-  }
-
-  public drawMouse(event: MouseEvent | TouchEvent): void {
-    if (!this.state.isEnabled || !this.state.isDrawing) {
-      return;
-    }
-
-    event.preventDefault();
-
-    const step: DrawingLineStep = {
-      start: this.state.currentPosition,
-      end: this.coordinate.getPosition(event)
-    };
-
-    this.updateState({ ...this.state, currentPosition: step.end });
-
-    this.renderStep(this.currentLine, step);
-    this.currentLine.steps.push(step);
+    this.updateState({
+      ...this.state,
+      startPosition: null,
+      endPosition: null,
+      isDrawing: false,
+    });
   }
 
   public renderLine(line: DrawingLine): void {
@@ -108,14 +127,34 @@ export class DrawableCanvasFacade {
     this.context.closePath();
   }
 
-  public back(): void {
-    if (this.lines.length > 0) {
-      this.context.clearRect(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height);
-      this.lines.pop();
+  public renderSelectionRect(): void {
+    this.redraw();
 
-      for (const line of this.lines) {
-        this.renderLine(line);
-      }
+    this.context.beginPath();
+    this.context.lineCap = 'round';
+    this.context.lineWidth = 3;
+    this.context.strokeStyle = '#000';
+    this.context.rect(
+      this.state.startPosition.x,
+      this.state.startPosition.y,
+      (this.state.endPosition.x - this.state.startPosition.x),
+      (this.state.endPosition.y - this.state.startPosition.y)
+    );
+    this.context.stroke();
+  }
+
+  public back(): void {
+    if (this.state.lines.length > 0) {
+      this.state.lines.pop();
+      this.redraw();
+    }
+  }
+
+  public redraw(): void {
+    this.context.clearRect(0, 0, this.canvasRef.nativeElement.width, this.canvasRef.nativeElement.height);
+
+    for (const line of this.state.lines) {
+      this.renderLine(line);
     }
   }
 
@@ -131,17 +170,27 @@ export class DrawableCanvasFacade {
     this.updateState({ ...this.state, isEnabled });
   }
 
+  public actiateDrawingMode(): void {
+    this.updateState({ ...this.state, mode: DrawingMode.drawing });
+    this.redraw();
+  }
+
+  public activateSelectionMode(): void {
+    this.updateState({ ...this.state, mode: DrawingMode.selection });
+  }
+
   protected initializeState(): void {
     this.state = {
       isEnabled: true,
+      mode: DrawingMode.drawing,
       isDrawing: false,
       strokeColor: '#00ccffff',
       strokeSize: 5,
       canvasOffset: new PositionOffset(),
-      currentPosition: {
-        x: 0,
-        y: 0,
-      },
+      startPosition: null,
+      endPosition: null,
+      currentLine: null,
+      lines: [],
     };
 
     this.stateSubject = new BehaviorSubject(this.state);

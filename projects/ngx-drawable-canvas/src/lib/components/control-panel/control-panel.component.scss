@@ -1,6 +1,9 @@
 .toolbar {
   min-height: 24px;
   min-width: 100%;
+  // padding: 1rem 0 0 1rem;
 
-  margin-bottom: 1px;
+  &-element {
+    margin: 3px 1rem 3px 0;
+  }
 }

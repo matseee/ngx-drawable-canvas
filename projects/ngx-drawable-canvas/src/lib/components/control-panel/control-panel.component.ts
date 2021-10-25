@@ -34,4 +34,12 @@ export class ControlPanelComponent {
     this.drawableCanvasFacade.setEnabled(false);
     this.colorPicker.show();
   }
+
+  public onDrawingMode(): void {
+    this.drawableCanvasFacade.actiateDrawingMode();
+  }
+
+  public onSelectionMode(): void {
+    this.drawableCanvasFacade.activateSelectionMode();
+  }
 }

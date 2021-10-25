@@ -1,6 +1,8 @@
 <div *ngIf="drawableCanvasFacade.state$ | async as state" class="toolbar">
-  <button (click)="onBackClicked()">Back</button>
-  <button #colorPicker (click)="onChooseColor()">Choose color</button>
+  <button (click)="onBackClicked()" class="toolbar-element">Back</button>
+  <button #colorPicker (click)="onChooseColor()" class="toolbar-element">Choose color</button>
   <input type="number" step="1" [value]="state.strokeSize"
-    (change)="drawableCanvasFacade.setStrokeSize($event.target.value)" />
+    (change)="drawableCanvasFacade.setStrokeSize($event.target.value)" class="toolbar-element" />
+  <button (click)="onDrawingMode()" class="toolbar-element">Draw</button>
+  <button (click)="onSelectionMode()" class="toolbar-element">Select</button>
 </div>

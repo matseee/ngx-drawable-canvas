@@ -60,6 +60,6 @@ export class DrawSurfaceComponent implements OnInit, AfterViewInit {
   @HostListener('window:mousemove', ['$event'])
   @HostListener('window:touchmove', ['$event'])
   protected drawMouse(event: MouseEvent | TouchEvent): void {
-    this.drawableCanvasFacade.drawMouse(event);
+    this.drawableCanvasFacade.moveMouse(event);
   }
 }

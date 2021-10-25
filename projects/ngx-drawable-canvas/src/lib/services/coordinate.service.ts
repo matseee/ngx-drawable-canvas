@@ -31,11 +31,11 @@ export class CoordinateService {
     }
   }
 
-  public checkInsideCanvas(): boolean {
-    return (this.state.currentPosition.x >= 0
-      && this.state.currentPosition.x <= this.drawingCanvasFacade.canvasRef.nativeElement.width
-      && this.state.currentPosition.y >= 0
-      && this.state.currentPosition.y <= this.drawingCanvasFacade.canvasRef.nativeElement.height);
+  public checkInsideCanvas(position: Position): boolean {
+    return (position.x >= 0
+      && position.x <= this.drawingCanvasFacade.canvasRef.nativeElement.width
+      && position.y >= 0
+      && position.y <= this.drawingCanvasFacade.canvasRef.nativeElement.height);
   }
 
   public calculateOffset(element: HTMLElement): PositionOffset {
