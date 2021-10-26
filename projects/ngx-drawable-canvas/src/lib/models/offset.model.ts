@@ -1,4 +1,4 @@
-export class PositionOffset {
+export class Offset {
   public left: number;
   public top: number;
 
@@ -7,8 +7,8 @@ export class PositionOffset {
     this.top = 0;
   }
 
-  public add(offset: PositionOffset): PositionOffset {
-    const result = new PositionOffset();
+  public add(offset: Offset): Offset {
+    const result = new Offset();
     result.left = this.left + offset.left;
     result.top = this.top + offset.top;
     return result;

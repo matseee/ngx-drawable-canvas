@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
+import { Offset } from '../models/offset.model';
 import { DrawableCanvasFacade } from './../facades/drawable-canvas.facade';
 import { DrawingState } from './../models/drawing-state.model';
-import { PositionOffset } from './../models/position-offset.model';
-import { Position } from './../models/position.model';
+import { Point } from './../models/point.model';
+import { Rect } from './../models/rect.model';
 
 
 @Injectable()
@@ -17,29 +18,44 @@ export class CoordinateService {
     this.drawingCanvasFacade.state$.subscribe((state: DrawingState) => this.state = state);
   }
 
-  public getPosition(event: MouseEvent | TouchEvent): Position {
+  public getPointFromMouseEvent(event: MouseEvent | TouchEvent): Point {
     if (event instanceof MouseEvent) {
-      return {
-        x: event.clientX - this.state.canvasOffset.left,
-        y: event.clientY - this.state.canvasOffset.top,
-      };
+      return new Point(
+        event.clientX - this.state.canvasOffset.left,
+        event.clientY - this.state.canvasOffset.top
+      );
     } else {
-      return {
-        x: event.touches[0].clientX - this.state.canvasOffset.left,
-        y: event.touches[0].clientY - this.state.canvasOffset.top,
-      };
+      return new Point(
+        event.touches[0].clientX - this.state.canvasOffset.left,
+        event.touches[0].clientY - this.state.canvasOffset.top
+      );
     }
   }
 
-  public checkInsideCanvas(position: Position): boolean {
-    return (position.x >= 0
-      && position.x <= this.drawingCanvasFacade.canvasRef.nativeElement.width
-      && position.y >= 0
-      && position.y <= this.drawingCanvasFacade.canvasRef.nativeElement.height);
+  public isPointInsideCanvas(point: Point): boolean {
+    return this.isPointInsideRect(
+      point,
+      new Rect(
+        new Point(0, 0),
+        new Point(
+          this.drawingCanvasFacade.canvasRef.nativeElement.width,
+          this.drawingCanvasFacade.canvasRef.nativeElement.height
+        )
+      )
+    );
   }
 
-  public calculateOffset(element: HTMLElement): PositionOffset {
-    let offset = new PositionOffset();
+  public isPointInsideRect(point: Point, rect: Rect): boolean {
+    const normalizedRect: Rect = rect.getNormalizedCopy();
+
+    return (point.x >= normalizedRect.pointOne.x
+      && point.x <= normalizedRect.pointTwo.x
+      && point.y >= normalizedRect.pointOne.y
+      && point.y <= normalizedRect.pointTwo.y);
+  }
+
+  public calculateOffset(element: HTMLElement): Offset {
+    let offset = new Offset();
     offset.left = element.offsetLeft;
     offset.top = element.offsetTop;
 
