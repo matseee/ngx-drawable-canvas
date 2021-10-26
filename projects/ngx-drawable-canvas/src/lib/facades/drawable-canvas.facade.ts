@@ -5,6 +5,7 @@ import { DrawingLineStep } from './../models/drawing-line-step.model';
 import { DrawingLine } from './../models/drawing-line.model';
 import { DrawingState } from './../models/drawing-state.model';
 import { PositionOffset } from './../models/position-offset.model';
+import { Position } from './../models/position.model';
 import { CoordinateService } from './../services/coordinate.service';
 
 
@@ -97,9 +98,12 @@ export class DrawableCanvasFacade {
     if (!this.state.isEnabled) {
       return;
     }
-
-    if (this.state.currentLine && this.state.isDrawing) {
-      this.state.lines.push(this.state.currentLine);
+    if (this.state.mode === DrawingMode.drawing) {
+      if (this.state.currentLine && this.state.isDrawing) {
+        this.state.lines.push(this.state.currentLine);
+      }
+    } else {
+      this.checkElementsInsideSelection();
     }
 
     this.updateState({
@@ -108,6 +112,44 @@ export class DrawableCanvasFacade {
       endPosition: null,
       isDrawing: false,
     });
+  }
+
+  public checkElementsInsideSelection(): void {
+    const rectStart: Position = {
+      x: this.state.startPosition.x < this.state.endPosition.x ? this.state.startPosition.x : this.state.endPosition.x,
+      y: this.state.startPosition.y < this.state.endPosition.y ? this.state.startPosition.y : this.state.endPosition.y,
+    };
+
+    const rectEnd: Position = {
+      x: this.state.startPosition.x > this.state.endPosition.x ? this.state.startPosition.x : this.state.endPosition.x,
+      y: this.state.startPosition.y > this.state.endPosition.y ? this.state.startPosition.y : this.state.endPosition.y,
+    };
+
+    const elementsInsideSelection: DrawingLine[] = this.state.lines.filter((line: DrawingLine) => {
+      const neededSteps: number = line.steps.length / 3;
+      let inside = 0;
+      let outside = 0;
+
+      for (const step of line.steps) {
+        const middleX: number = (step.start.x + step.end.x) / 2;
+        const middleY: number = (step.start.y + step.end.y) / 2;
+
+        if (rectStart.x <= middleX && middleX <= rectEnd.x
+          && rectStart.y <= middleY && middleY <= rectEnd.y) {
+          inside++;
+        } else {
+          outside++;
+        }
+
+        if (inside > neededSteps) {
+          return true;
+        } else if (outside > neededSteps) {
+          return false;
+        }
+      }
+    });
+
+    console.log(elementsInsideSelection);
   }
 
   public renderLine(line: DrawingLine): void {
@@ -132,7 +174,8 @@ export class DrawableCanvasFacade {
 
     this.context.beginPath();
     this.context.lineCap = 'round';
-    this.context.lineWidth = 3;
+    this.context.lineWidth = 1;
+    this.context.setLineDash([5, 3]);
     this.context.strokeStyle = '#000';
     this.context.rect(
       this.state.startPosition.x,
