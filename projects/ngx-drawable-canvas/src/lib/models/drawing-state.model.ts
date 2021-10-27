@@ -23,7 +23,7 @@ export interface DrawingState {
   endPoint?: Point;
 
   selectionRect?: Rect;
-  selectedPaths?: DrawingPath[];
-  tmpMovedPaths?: DrawingPath[];
-  tmpMovedRect?: Rect;
+  selectedPathIndicies?: number[];
+  tmpPaths?: DrawingPath[];
+  tmpSelectionRect?: Rect;
 }

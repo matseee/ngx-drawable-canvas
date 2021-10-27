@@ -14,7 +14,15 @@ export class DrawingPath {
 
     public translate(delta: Point): void {
         for (const line of this.lines) {
-            // step.start.translate;
+            line.translate(delta);
         }
+    }
+
+    public copy(): DrawingPath {
+        const copy: DrawingPath = new DrawingPath(this.lineWidth, this.strokeColor);
+        for (const line of this.lines) {
+            copy.lines.push(line.copy());
+        }
+        return copy;
     }
 }

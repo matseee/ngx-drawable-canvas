@@ -47,8 +47,15 @@ export class DrawableCanvasFacade {
         currentPath: new DrawingPath(this.state.strokeSize, this.state.strokeColor)
       });
 
-      if (this.state.mode === DrawingMode.selection && this.state.selectedPaths.length > 0) {
+      if (this.state.mode === DrawingMode.selection && this.state.selectedPathIndicies.length > 0) {
         this.updateState({ isMoving: this.coordinate.isPointInsideRect(this.state.startPoint, this.state.selectionRect) });
+
+        if (this.state.isMoving) {
+          this.updateState({
+            tmpPaths: this.copyDrawingPathArray(this.state.paths),
+            tmpSelectionRect: this.state.selectionRect.copy()
+          });
+        }
       }
     }
   }
@@ -79,21 +86,23 @@ export class DrawableCanvasFacade {
           this.state.endPoint.y - this.state.startPoint.y,
         );
 
-        console.log(delta);
+        this.updateState({
+          paths: this.copyDrawingPathArray(this.state.tmpPaths)
+        });
 
-        for (const path of this.state.selectedPaths) {
-          path.translate(delta);
+        for (const index of this.state.selectedPathIndicies) {
+          this.state.paths[index].translate(delta);
         }
 
-        this.updateState({ tmpMovedRect: this.state.selectionRect.copy() });
-        this.state.tmpMovedRect.translate(delta);
-
-        this.redraw();
-        this.renderRect(this.state.tmpMovedRect);
-
+        this.updateState({ selectionRect: this.state.tmpSelectionRect.copy() });
+        this.state.selectionRect.translate(delta);
       } else {
-        this.renderSelectionRect();
+        this.updateState({
+          selectionRect: new Rect(this.state.startPoint, this.state.endPoint).getNormalizedCopy()
+        });
       }
+
+      this.redraw();
     }
   }
 
@@ -112,7 +121,6 @@ export class DrawableCanvasFacade {
       if (this.state.isMoving) {
 
       } else {
-        this.updateState({ selectionRect: new Rect(this.state.startPoint, this.state.endPoint).getNormalizedCopy() });
         this.checkElementsInsideSelection();
       }
     }
@@ -121,37 +129,34 @@ export class DrawableCanvasFacade {
   }
 
   public checkElementsInsideSelection(): void {
-    const selectedPaths: DrawingPath[] = this.state.paths.filter((path: DrawingPath) => {
-      const neededSteps: number = path.lines.length / 3;
-      let inside = 0;
-      let outside = 0;
+    const selectedPathIndecies: number[] = this.state.paths
+      .map((path: DrawingPath, index: number) => {
+        const neededSteps: number = path.lines.length / 3;
+        let inside = 0;
+        let outside = 0;
 
-      for (const line of path.lines) {
-        const middlePoint: Point = new Point(
-          (line.pointOne.x + line.pointTwo.x) / 2,
-          (line.pointOne.y + line.pointTwo.y) / 2
-        );
+        for (const line of path.lines) {
+          const middlePoint: Point = new Point(
+            (line.pointOne.x + line.pointTwo.x) / 2,
+            (line.pointOne.y + line.pointTwo.y) / 2
+          );
 
-        if (this.coordinate.isPointInsideRect(middlePoint, this.state.selectionRect)) {
-          inside++;
-        } else {
-          outside++;
+          if (this.coordinate.isPointInsideRect(middlePoint, this.state.selectionRect)) {
+            inside++;
+          } else {
+            outside++;
+          }
+
+          if (inside > neededSteps) {
+            return index;
+          } else if (outside > neededSteps) {
+            return null;
+          }
         }
+      })
+      .filter((index: number) => index !== null);
 
-        if (inside > neededSteps) {
-          return true;
-        } else if (outside > neededSteps) {
-          return false;
-        }
-      }
-    });
-
-    this.updateState({ selectedPaths });
-  }
-
-  public renderSelectionRect(): void {
-    this.redraw();
-    this.renderRect(new Rect(this.state.startPoint, this.state.endPoint));
+    this.updateState({ selectedPathIndicies: selectedPathIndecies });
   }
 
   public renderPath(path: DrawingPath): void {
@@ -199,6 +204,10 @@ export class DrawableCanvasFacade {
     for (const path of this.state.paths) {
       this.renderPath(path);
     }
+
+    if (this.state.selectionRect) {
+      this.renderRect(this.state.selectionRect);
+    }
   }
 
   public setStrokeColor(strokeColor: string): void {
@@ -222,6 +231,10 @@ export class DrawableCanvasFacade {
     this.updateState({ mode: DrawingMode.selection });
   }
 
+  protected copyDrawingPathArray(paths: DrawingPath[]): DrawingPath[] {
+    return paths.map((path: DrawingPath) => path.copy());
+  }
+
   protected initializeState(): void {
     this.state = {
       isEnabled: true,
@@ -237,7 +250,7 @@ export class DrawableCanvasFacade {
       endPoint: null,
 
       selectionRect: null,
-      selectedPaths: [],
+      selectedPathIndicies: [],
 
       currentPath: null,
       paths: [],
