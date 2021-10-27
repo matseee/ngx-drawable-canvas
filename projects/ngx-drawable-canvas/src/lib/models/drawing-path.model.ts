@@ -25,4 +25,44 @@ export class DrawingPath {
         }
         return copy;
     }
+
+    public getMinPoint(): Point {
+        let minPoint: Point = new Point();
+
+        for (const line of this.lines) {
+            const tmpMinPoint: Point = line.getMinPoint();
+
+            if (minPoint.x === 0 && minPoint.y === 0) {
+                minPoint = tmpMinPoint;
+            }
+            if (minPoint.x > tmpMinPoint.x) {
+                minPoint.x = tmpMinPoint.x;
+            }
+            if (minPoint.y > tmpMinPoint.y) {
+                minPoint.y = tmpMinPoint.y;
+            }
+        }
+
+        return minPoint;
+    }
+
+    public getMaxPoint(): Point {
+        let maxPoint: Point = new Point();
+
+        for (const line of this.lines) {
+            const tmpMinPoint: Point = line.getMaxPoint();
+
+            if (maxPoint.x === 0 && maxPoint.y === 0) {
+                maxPoint = tmpMinPoint;
+            }
+            if (maxPoint.x < tmpMinPoint.x) {
+                maxPoint.x = tmpMinPoint.x;
+            }
+            if (maxPoint.y < tmpMinPoint.y) {
+                maxPoint.y = tmpMinPoint.y;
+            }
+        }
+
+        return maxPoint;
+    }
 }

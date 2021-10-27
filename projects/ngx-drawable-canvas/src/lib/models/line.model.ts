@@ -17,4 +17,18 @@ export class Line {
     public copy(): Line {
         return new Line(this.pointOne.copy(), this.pointTwo.copy());
     }
+
+    public getMinPoint(): Point {
+        return new Point(
+            this.pointOne.x < this.pointTwo.x ? this.pointOne.x : this.pointTwo.x,
+            this.pointOne.y < this.pointTwo.y ? this.pointOne.y : this.pointTwo.y
+        );
+    }
+
+    public getMaxPoint(): Point {
+        return new Point(
+            this.pointOne.x > this.pointTwo.x ? this.pointOne.x : this.pointTwo.x,
+            this.pointOne.y > this.pointTwo.y ? this.pointOne.y : this.pointTwo.y
+        );
+    }
 }

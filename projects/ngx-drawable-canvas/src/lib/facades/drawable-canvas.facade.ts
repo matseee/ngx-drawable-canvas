@@ -122,14 +122,54 @@ export class DrawableCanvasFacade {
 
       } else {
         this.checkElementsInsideSelection();
+        if (this.state.selectedPathIndicies.length > 0) {
+          this.getMinimumSelectionRect();
+        } else {
+          this.updateState({ selectionRect: null });
+        }
+
+        this.redraw();
       }
     }
 
     this.updateState({ isActive: false });
   }
 
+  public getMinimumSelectionRect(): void {
+    const selectionRect: Rect = new Rect();
+
+    for (const index of this.state.selectedPathIndicies) {
+      const minPoint: Point = this.state.paths[index].getMinPoint();
+      const maxPoint: Point = this.state.paths[index].getMaxPoint();
+
+      selectionRect.pointOne.x =
+        (selectionRect.pointOne.x === 0
+          || minPoint.x < selectionRect.pointOne.x) ? minPoint.x : selectionRect.pointOne.x;
+
+      selectionRect.pointOne.y =
+        (selectionRect.pointOne.y === 0
+          || minPoint.y < selectionRect.pointOne.y) ? minPoint.y : selectionRect.pointOne.y;
+
+      selectionRect.pointTwo.x =
+        (selectionRect.pointTwo.x === 0
+          || maxPoint.x > selectionRect.pointTwo.x) ? maxPoint.x : selectionRect.pointTwo.x;
+
+      selectionRect.pointTwo.y =
+        (selectionRect.pointTwo.y === 0
+          || maxPoint.y > selectionRect.pointTwo.y) ? maxPoint.y : selectionRect.pointTwo.y;
+    }
+
+    selectionRect.pointOne.x -= 5;
+    selectionRect.pointOne.y -= 5;
+
+    selectionRect.pointTwo.x += 5;
+    selectionRect.pointTwo.y += 5;
+
+    this.updateState({ selectionRect });
+  }
+
   public checkElementsInsideSelection(): void {
-    const selectedPathIndecies: number[] = this.state.paths
+    const selectedPathIndicies: number[] = this.state.paths
       .map((path: DrawingPath, index: number) => {
         const neededSteps: number = path.lines.length / 3;
         let inside = 0;
@@ -156,7 +196,7 @@ export class DrawableCanvasFacade {
       })
       .filter((index: number) => index !== null);
 
-    this.updateState({ selectedPathIndicies: selectedPathIndecies });
+    this.updateState({ selectedPathIndicies });
   }
 
   public renderPath(path: DrawingPath): void {
