@@ -17,7 +17,7 @@ jobs:
 
     - run: npm install
     - run: npm run lint ngx-drawable-canvas
-    - run: npm run test
+    - run: npm run test ngx-drawable-canvas -- --no-watch --no-progress --browsers=ChromeHeadlessCI
     - run: npm run build ngx-drawable-canvas -- --prod
     - run: npm run build ngx-drawable-canvas-testpage -- --prod --base-href "/ngx-drawable-canvas/"
     
