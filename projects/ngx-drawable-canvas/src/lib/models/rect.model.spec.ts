@@ -45,4 +45,15 @@ describe('Rect', () => {
         expect(normalizedRect.pointOne).toEqual(new Point(20, 10));
         expect(normalizedRect.pointTwo).toEqual(new Point(50, 20));
     });
+
+    it('should return the normalized version of R(P(20,20),P(50,10))', () => {
+        const unnormalizedRect = new Rect(
+            new Point(20, 20),
+            new Point(50, 10)
+        );
+
+        const normalizedRect = unnormalizedRect.getNormalizedCopy();
+        expect(normalizedRect.pointOne).toEqual(new Point(20, 10));
+        expect(normalizedRect.pointTwo).toEqual(new Point(50, 20));
+    });
 });
