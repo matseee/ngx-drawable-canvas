@@ -1,14 +1,13 @@
 import { Line } from './line.model';
 import { Point } from './point.model';
+import { RenderSettings } from './render-settings';
 
 export class DrawingPath {
-    public lineWidth: number;
-    public strokeColor: string;
+    public settings: RenderSettings;
     public lines: Line[];
 
-    constructor(lineWidth?: number, strokeColor?: string) {
-        this.lineWidth = lineWidth ?? 5;
-        this.strokeColor = strokeColor ?? '#000';
+    constructor(settings?: RenderSettings) {
+        this.settings = settings ?? new RenderSettings();
         this.lines = [];
     }
 
@@ -19,7 +18,7 @@ export class DrawingPath {
     }
 
     public copy(): DrawingPath {
-        const copy: DrawingPath = new DrawingPath(this.lineWidth, this.strokeColor);
+        const copy: DrawingPath = new DrawingPath(this.settings);
         for (const line of this.lines) {
             copy.lines.push(line.copy());
         }
@@ -28,11 +27,13 @@ export class DrawingPath {
 
     public getMinPoint(): Point {
         let minPoint: Point = new Point();
+        minPoint.x = null;
+        minPoint.y = null;
 
         for (const line of this.lines) {
             const tmpMinPoint: Point = line.getMinPoint();
 
-            if (minPoint.x === 0 && minPoint.y === 0) {
+            if (minPoint.x === null && minPoint.y === null) {
                 minPoint = tmpMinPoint;
             }
             if (minPoint.x > tmpMinPoint.x) {
@@ -48,11 +49,13 @@ export class DrawingPath {
 
     public getMaxPoint(): Point {
         let maxPoint: Point = new Point();
+        maxPoint.x = null;
+        maxPoint.y = null;
 
         for (const line of this.lines) {
             const tmpMinPoint: Point = line.getMaxPoint();
 
-            if (maxPoint.x === 0 && maxPoint.y === 0) {
+            if (maxPoint.x === null && maxPoint.y === null) {
                 maxPoint = tmpMinPoint;
             }
             if (maxPoint.x < tmpMinPoint.x) {
