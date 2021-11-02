@@ -4,6 +4,7 @@ import { DrawingMode } from '../enums/drawing-mode.enum';
 import { DrawingPath } from '../models/drawing-path.model';
 import { Line } from '../models/line.model';
 import { Offset } from '../models/offset.model';
+import { RenderSettings } from '../models/render-settings';
 import { DrawingState } from './../models/drawing-state.model';
 import { Point } from './../models/point.model';
 import { Rect } from './../models/rect.model';
@@ -250,12 +251,8 @@ export class DrawableCanvasFacade {
     }
   }
 
-  public setStrokeColor(strokeColor: string): void {
-    this.updateState({ strokeColor });
-  }
-
-  public setStrokeSize(strokeSize: number): void {
-    this.updateState({ strokeSize });
+  public setRenderSettings(renderSettings): void {
+    this.updateState({ renderSettings });
   }
 
   public setEnabled(isEnabled: boolean): void {
@@ -282,8 +279,7 @@ export class DrawableCanvasFacade {
       isActive: false,
       isMoving: false,
 
-      strokeColor: '#00ccffff',
-      strokeSize: 5,
+      renderSettings: new RenderSettings(),
       canvasOffset: new Offset(),
 
       startPoint: null,

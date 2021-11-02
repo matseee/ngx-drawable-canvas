@@ -1,8 +1,9 @@
 import { DrawingMode } from './../enums/drawing-mode.enum';
+import { CanvasSettings } from './canvas-settings';
 import { DrawingPath } from './drawing-path.model';
-import { Offset } from './offset.model';
 import { Point } from './point.model';
 import { Rect } from './rect.model';
+import { RenderSettings } from './render-settings';
 
 export interface DrawingState {
   isEnabled?: boolean;
@@ -11,10 +12,8 @@ export interface DrawingState {
   isActive?: boolean;
   isMoving?: boolean;
 
-  strokeColor?: string;
-  strokeSize?: number;
-
-  canvasOffset?: Offset;
+  renderSettings?: RenderSettings;
+  canvasSettings?: CanvasSettings;
 
   currentPath?: DrawingPath;
   paths?: DrawingPath[];

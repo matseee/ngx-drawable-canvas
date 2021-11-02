@@ -1,33 +1,39 @@
 import { Injectable } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
 import { Offset } from '../models/offset.model';
-import { DrawableCanvasFacade } from './../facades/drawable-canvas.facade';
 import { DrawingState } from './../models/drawing-state.model';
 import { Point } from './../models/point.model';
 import { Rect } from './../models/rect.model';
 
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CoordinateService {
+  protected subscription: Subscription;
   protected state: DrawingState;
-  protected drawingCanvasFacade: DrawableCanvasFacade;
 
   constructor() { }
 
-  public initialize(drawingCanvasFacade: DrawableCanvasFacade): void {
-    this.drawingCanvasFacade = drawingCanvasFacade;
-    this.drawingCanvasFacade.state$.subscribe((state: DrawingState) => this.state = state);
+  public initialize(state$: Observable<DrawingState>): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
+    }
+
+    this.subscription = state$.subscribe((state: DrawingState) => this.state = state);
   }
 
   public getPointFromMouseEvent(event: MouseEvent | TouchEvent): Point {
     if (event instanceof MouseEvent) {
       return new Point(
-        event.clientX - this.state.canvasOffset.left,
-        event.clientY - this.state.canvasOffset.top
+        event.clientX - this.state.canvasSettings.offset.left,
+        event.clientY - this.state.canvasSettings.offset.top
       );
     } else {
       return new Point(
-        event.touches[0].clientX - this.state.canvasOffset.left,
-        event.touches[0].clientY - this.state.canvasOffset.top
+        event.touches[0].clientX - this.state.canvasSettings.offset.left,
+        event.touches[0].clientY - this.state.canvasSettings.offset.top
       );
     }
   }
@@ -37,10 +43,7 @@ export class CoordinateService {
       point,
       new Rect(
         new Point(0, 0),
-        new Point(
-          this.drawingCanvasFacade.canvasRef.nativeElement.width,
-          this.drawingCanvasFacade.canvasRef.nativeElement.height
-        )
+        new Point(this.state.canvasSettings.width, this.state.canvasSettings.height)
       )
     );
   }

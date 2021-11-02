@@ -2,9 +2,9 @@ export class Offset {
   public left: number;
   public top: number;
 
-  constructor() {
-    this.left = 0;
-    this.top = 0;
+  constructor(left?: number, top?: number) {
+    this.left = left ?? 0;
+    this.top = top ?? 0;
   }
 
   public add(offset: Offset): Offset {
