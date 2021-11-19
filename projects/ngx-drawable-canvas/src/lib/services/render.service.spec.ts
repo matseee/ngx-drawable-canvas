@@ -1,7 +1,11 @@
 import { ElementRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { DrawingMode } from '../enums/drawing-mode.enum';
+import { CanvasSettings } from '../models/canvas-settings';
 import { Point } from '../models/point.model';
 import { RenderSettings } from '../models/render-settings';
+import { DrawingState } from './../models/drawing-state.model';
 import { Line } from './../models/line.model';
 import { Rect } from './../models/rect.model';
 import { RenderService } from './render.service';
@@ -12,6 +16,21 @@ describe('RenderService', () => {
     let canvas: HTMLCanvasElement;
     let canvasRef: ElementRef<HTMLCanvasElement>;
 
+    const state: DrawingState = {
+      isEnabled: true,
+      mode: DrawingMode.drawing,
+      isActive: false,
+      isMoving: false,
+      renderSettings: new RenderSettings(),
+      canvasSettings: new CanvasSettings(),
+      startPoint: null,
+      endPoint: null,
+      selectionRect: null,
+      selectedPathIndicies: [],
+      currentPath: null,
+      paths: [],
+    };
+
     beforeEach(() => {
       TestBed.configureTestingModule({});
       render = TestBed.inject(RenderService);
@@ -19,18 +38,24 @@ describe('RenderService', () => {
       canvas = document.createElement('canvas');
       canvasRef = new ElementRef(canvas);
 
-      render.initialize(canvasRef);
+      render.initialize(canvasRef, of(state));
     });
 
     it('should be created', () => {
       expect(render).toBeTruthy();
     });
 
-    it('should be initialized with an canvasReferance', () => {
+    it('should be initialized with an canvasReferance and an state observable', () => {
       // tslint:disable-next-line: no-string-literal
       expect(render['canvasRef']).toBeTruthy();
       // tslint:disable-next-line: no-string-literal
       expect(render['context']).toBeTruthy();
+      // tslint:disable-next-line: no-string-literal
+      expect(render['state']).toEqual(state);
+    });
+
+    it('should rerender the drawing path', () => {
+      expect(render.rerender()).toEqual(true);
     });
 
     it('should render a line', () => {
